@@ -12,8 +12,8 @@
                 "Good morning",
                 "Good afternoon",
                 "Good evening",
-                "It’s nice to meet you",
-                "It’s a pleasure to meet you"
+                "It's nice to meet you",
+                "It's a pleasure to meet you"
             ]
         },
         {
@@ -28,7 +28,7 @@
         {
             "tag": "jokes",
             "sentences":[
-                "Did you hear about the mathematician who’s afraid of negative numbers?",
+                "Did you hear about the mathematician who's afraid of negative numbers?",
                 "Why do we tell actors to 'break a leg?'",
                 "Helvetica and Times New Roman walk into a bar.",
                 "Did you hear about the actor who fell through the floorboards?"
