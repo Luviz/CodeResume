@@ -1,13 +1,13 @@
 class Node:
     # parent: Node
-    def __init__(self, data, parant = None):
+    def __init__(self, data, parent = None):
         self.data = data
-        self.parant = parant
+        self.parent = parent
         self.children = []
 
     def __iadd__(self, child):
         self.children.append(child)
-        child.parant = self
+        child.parent = self
         return self
 
     def __len__(self):
@@ -30,8 +30,6 @@ class Node:
         for r in self.get_right():
             yield from r
         
-        # raise StopIteration()
-
     def get_list(self):
         res = []
         l = self.get_left()
@@ -46,8 +44,15 @@ class Node:
 
     def get_right(self, pivot=1):
         return self.children[pivot:]
-        
 
+    def GetPath(self):
+        # path.append(self.data)
+        if self.parent == None:
+            return [self]
+        path = self.parent.GetPath()
+        path.append(self)
+        return path
+        
 
 def __test_basic_iter():
     ## TEST
@@ -68,9 +73,11 @@ def __test_basic_iter():
     for n in root:
         print(n)
 
+    print(c.GetPath())
+
 def __test_large_scale():
     alphabet = [chr(v) for v in range(ord('A'), ord('Z')+1)]
-    root = Node('0')
+    root = Node('root')
     for char in alphabet[:5]:
         root += Node(char)
 
@@ -88,8 +95,9 @@ def __test_large_scale():
 
     print(root.get_list())
     for n in root: 
-        print(n)
-
+        print(n, n.GetPath())
+    print()
+    print(root.children[2].children[1].GetPath())
 
 if __name__ == "__main__":
     # __test_basic_iter()
