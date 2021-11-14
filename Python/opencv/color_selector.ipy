@@ -1,0 +1,40 @@
+import numpy as np
+import cv2
+
+
+cap = cv2.VideoCapture(1)
+
+try:
+    while True:
+        ret, frame = cap.read()
+        hls = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
+
+        cv2.imshow('frame', frame[:, :])
+
+        # print(len(hls[0, 0]))
+
+        hue = hls[:, :, 0]
+        light = hls[:, :, 1]
+        saturation = hls[:, :, 2]
+
+        # print(max(np.array(hue).flatten()))
+        # cv2.imshow('H', hue)
+        # cv2.imshow('L', light)
+        # cv2.imshow('S', saturation)
+
+        l = 30
+        for hf in range(0,180,l):
+            mask = cv2.inRange(hue, hf, hf+l)
+            a = cv2.bitwise_and(frame, frame, mask=mask)
+            cv2.imshow(f"hue: {hf}:{hf+l}", a)
+
+
+
+        if cv2.waitKey(1) == ord('q'):
+            break
+
+except KeyboardInterrupt as e:
+    print("quiting")
+
+cap.release()
+cv2.destroyAllWindows()
