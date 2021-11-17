@@ -1,0 +1,73 @@
+import numpy as np
+import cv2 as cv
+from math import sqrt
+
+
+def bounding_size(x, y, w, h):
+    diganal = sqrt(w*w + h*h)
+    return diganal, (x, y, w, h)
+
+
+def getCam(n): return cv.VideoCapture(n)
+
+
+run = True
+
+
+capNum = 0
+cap = getCam(capNum)
+
+
+try:
+    while run:
+        rat, frame = cap.read()
+        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+
+        # dst = cv.Laplacian(frame, cv.CV_8U, 10)
+        # abs_dst = cv.convertScaleAbs(dst)
+
+        blur = cv.GaussianBlur(gray, (5, 5), 15)
+
+        canny = cv.Canny(blur, 80, 150)
+
+        ret, thresh = cv.threshold(gray, 127, 255, 0)
+
+        try:
+            contours, hierarchy = cv.findContours(
+                canny, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+            # print(hierarchy)
+            # print(len(contours))
+            if len(contours) > 4:
+                cv.drawContours(frame, contours, 3, (0, 255, 200), 3)
+            else:
+                cv.drawContours(frame, contours, -1, (100, 50, 200), 2)
+
+            rects = sorted([bounding_size(*cv.boundingRect(cntur))
+                           for cntur in contours])
+
+            if len(rects) > 1:  
+                min= rects[0][0]; max= rects[-1][0]                          
+                for d, (x, y, w, h) in rects:
+                    size_in_set = (d - min) / max
+                    cv.rectangle(frame, (x, y), (x+w, y+h), (255*size_in_set, 100, 0), 2)
+
+            cv.imshow("util", canny)
+        except Exception as e:
+            print(e)
+
+        # ret, corners = cv.find(gray, (7,6), None)
+
+        cv.imshow("aaa", frame)
+
+        waitKey = cv.waitKey(1)
+        if waitKey > 0:
+            print(waitKey, chr(waitKey))
+            if waitKey == ord('c'):
+                capNum = 1 ^ capNum
+                cap = getCam(capNum)
+            if waitKey == ord('q') or waitKey == 27:
+                run = False
+
+
+except Exception as e:
+    print(e)
