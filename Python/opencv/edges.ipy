@@ -22,13 +22,15 @@ try:
     while run:
         rat, frame = cap.read()
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        hls = cv.cvtColor(frame, cv.COLOR_BGR2HLS)
 
         # dst = cv.Laplacian(frame, cv.CV_8U, 10)
         # abs_dst = cv.convertScaleAbs(dst)
 
-        blur = cv.GaussianBlur(gray, (5, 5), 15)
+        blur = cv.GaussianBlur(gray, (5, 5), 0)
+        hls_blur = cv.GaussianBlur(hls, (5,5), 0)
 
-        canny = cv.Canny(blur, 80, 150)
+        canny = cv.Canny(hls_blur[:,:,1:2], 80, 150)
 
         ret, thresh = cv.threshold(gray, 127, 255, 0)
 
@@ -57,6 +59,8 @@ try:
 
         # ret, corners = cv.find(gray, (7,6), None)
 
+        cv.imshow("hls", hls[:,:,1:2])
+        cv.imshow("hls_blur", hls_blur[:,:,1:2])
         cv.imshow("aaa", frame)
 
         waitKey = cv.waitKey(1)
