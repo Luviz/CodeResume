@@ -19,18 +19,18 @@ run = True
 
 adaptiveMode = 1
 adpti_maxval = 255
+adpti_thresholdType = 0  # cv.THRESH_BINARY == 0; INV == 1
 adpti_C = 11
-
 try:
     while run:
         rat, frame = cap.read()
 
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-        gaussian = cv.GaussianBlur(gray, (3, 3), cv.BORDER_DEFAULT)
+        # gaussian = cv.GaussianBlur(gray, (3, 3), cv.BORDER_DEFAULT)
 
         try:
             thrs_gray = cv.adaptiveThreshold(
-                gaussian,  adpti_maxval, adaptiveMode, cv.THRESH_BINARY, 31, adpti_C)
+                gray,  adpti_maxval, adaptiveMode, adpti_thresholdType, 31, adpti_C)
             cv.imshow("thrs_gray", thrs_gray)
 
             canny = cv.Canny(thrs_gray, 155, 200)
@@ -64,6 +64,9 @@ try:
         waitKey = cv.waitKey(1)
         if waitKey > 0:
             print(waitKey, chr(waitKey))
+            if waitKey == ord('i'):
+                adpti_thresholdType = adpti_thresholdType ^ 1
+                print(f"{adpti_thresholdType=}")
             if waitKey == ord('o'):
                 adpti_C -= 1
                 print(f"{adpti_C=}")
