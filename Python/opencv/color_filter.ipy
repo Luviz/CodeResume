@@ -3,8 +3,11 @@ import cv2 as cv
 import time
 import math
 
-cap = cv.VideoCapture(1)
-def get_ms(): return time.time() * 10
+cap = cv.VideoCapture(0)
+
+
+def get_ms():
+    return time.time() * 10
 
 
 init_time = get_ms()
@@ -13,11 +16,19 @@ init_time = get_ms()
 def render_with_mask(frame, mask_frame, win_name, lim=255):
     hf = math.trunc((get_ms() - init_time) % lim)
     l = 10
-    mask = cv.inRange(mask_frame, hf, hf+l)
+    mask = cv.inRange(mask_frame, hf, hf + l)
     hue = cv.bitwise_and(frame, frame, mask=mask)
     # print(hf)
-    cv.putText(hue, f"{hf}-{hf+l}", (10, 50), fontFace=cv.FONT_HERSHEY_SIMPLEX,
-                fontScale=1, color=(0, 255, 0), thickness=2, lineType=1)
+    cv.putText(
+        hue,
+        f"{hf}-{hf+l}",
+        (10, 50),
+        fontFace=cv.FONT_HERSHEY_SIMPLEX,
+        fontScale=1,
+        color=(0, 255, 0),
+        thickness=2,
+        lineType=1,
+    )
     cv.imshow(win_name, hue)
 
 
@@ -26,7 +37,7 @@ try:
         ret, frame = cap.read()
         hls = cv.cvtColor(frame, cv.COLOR_BGR2HSV_FULL)
 
-        cv.imshow('frame', frame[:, :])
+        cv.imshow("frame", frame[:, :])
 
         hue = hls[:, :, 0]
         saturation = hls[:, :, 1]
@@ -36,7 +47,7 @@ try:
         render_with_mask(frame, hue, "hue")
         render_with_mask(frame, saturation, "saturation")
 
-        if cv.waitKey(1) == ord('q'):
+        if cv.waitKey(1) == ord("q"):
             break
 
 
