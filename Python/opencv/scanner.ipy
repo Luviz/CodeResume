@@ -1,0 +1,157 @@
+#! /usr/bin/python
+from asyncio import ThreadedChildWatcher
+import cv2 as cv
+import time
+
+from graphviz import render
+
+
+def get_ms():
+    return time.time() * 10
+
+
+init_time = get_ms()
+
+
+def main(cam_src=None):
+    if cam_src == None:
+        cam_src = 0
+    cap = cv.VideoCapture(cam_src)
+
+    c = 0
+    key = 2
+    run = True
+    frm = 150
+    rect = None
+    x_i = 5
+
+    try:
+        while run:
+            c = c + 1
+            _, frame = cap.read()
+
+            if key == 2:
+                render_frame, _ = processMeter(frame)
+            elif key == 3:
+                _, render_frame = processMeter(frame)
+            elif key == 4:
+                blue_frame, mask = selectblue(frame, frm)
+                # selectMeterLocation(mask)
+
+                render_frame = blue_frame
+                if (c % 5) == 0:
+                    contours = find_contours(mask)
+                    rect = contours[max(contours.keys())]
+                if rect is not None:
+                    x, y, w, h = rect
+                    _ = cv.rectangle(
+                        render_frame, (x, y), (x + w, y + h), (0, 255, 0), 14
+                    )
+            elif key == 5:
+                render_frame = frame
+                frame_a, frame_b = processMeter(frame)
+                contours = find_contours(frame_a)
+                rects = [contours[key] for key in sorted(contours)]
+                for x, y, w, h in rects[-(5 + x_i) : -x_i]:
+                    _ = cv.rectangle(
+                        render_frame,
+                        (x, y),
+                        (x + w, y + h),
+                        (0, 255, 0),
+                    )
+
+                contours = find_contours(frame_b)
+                rects = [contours[key] for key in sorted(contours)]
+                for x, y, w, h in rects[-(5 + x_i) : -x_i]:
+                    _ = cv.rectangle(
+                        render_frame, (x, y), (x + w, y + h), (0, 0, 255), 7
+                    )
+            else:
+                render_frame = frame
+                try:
+                    if c % 5 == 0:
+                        rect = selectMeterLocation(frame)
+                    if rect:
+                        x, y, w, h = rect
+                        _ = cv.rectangle(
+                            render_frame, (x, y), (x + w, y + h), (0, 255, 0), 7
+                        )
+                except Exception as e:
+                    print(e)
+
+            cv.imshow("frame", render_frame)
+
+            waitKey = cv.waitKey(1)
+            if waitKey > 0:
+                # print(waitKey, chr(waitKey))
+                if waitKey in [ord(str(i)) for i in range(10)]:
+                    print(f"{waitKey=}, {key}")
+                    key = int(chr(waitKey))
+                if waitKey == ord("o"):
+                    frm = frm + 10
+                    print(f"{frm = }")
+                if waitKey == ord("l"):
+                    frm = frm - 10
+                    print(f"{frm = }")
+                if waitKey == ord("i"):
+                    x_i = x_i + 1
+                    print(f"{x_i = }")
+                if waitKey == ord("k"):
+                    x_i = x_i - 1
+                    print(f"{x_i = }")
+
+                if waitKey == ord("q") or waitKey == 27:
+                    run = False
+
+    except KeyboardInterrupt as e:
+        print("quiting")
+
+
+def selectblue(img, frm=120, offset=20):
+    hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV_FULL)
+    hue = hsv[:, :, 0]
+    # 100 -> 130
+
+    mask = cv.inRange(hue, frm, frm + offset)
+    mask = cv.GaussianBlur(mask, (5, 5), 500)
+
+    return cv.bitwise_and(img, img, mask=mask), mask
+
+
+def processMeter(img, k=5):
+    # blur the img
+    img = img.copy()
+    b_img = cv.GaussianBlur(img, (k, k), 500)
+    img_HSV = cv.cvtColor(b_img, cv.COLOR_BGR2HSV_FULL)
+
+    saturation = img_HSV[:, :, 1]
+    value = img_HSV[:, :, 2]
+
+    _, thresh1 = cv.threshold(saturation, 0, 255, cv.THRESH_OTSU | cv.THRESH_BINARY)
+    _, thresh2 = cv.threshold(value, 0, 255, cv.THRESH_OTSU | cv.THRESH_BINARY_INV)
+    out_img = thresh2 | thresh1
+    threshold = 200
+    canny_img = cv.Canny(out_img, threshold, threshold * 2)
+    return canny_img, out_img
+
+
+def selectMeterLocation(img):
+    new_img, _ = processMeter(img)
+    # contours, _ = cv.findContours(new_img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+    mapArea = find_contours(new_img)
+    return mapArea[max(mapArea.keys())]
+
+
+def find_contours(img):
+    contours, _ = cv.findContours(img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+    return {
+        w * h: (x, y, w, h) for x, y, w, h in [cv.boundingRect(cnt) for cnt in contours]
+    }
+
+
+if __name__ == "__main__":
+    usr = pas = "aaa"
+    ip = "192.168.50.175"
+    port = "8080"
+    ip_cam_url = f"http://{usr}:{pas}@{ip}:{port}/video"
+    main(ip_cam_url)
