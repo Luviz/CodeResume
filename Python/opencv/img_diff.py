@@ -17,14 +17,13 @@ def main(cam_src=None):
     key = 0
     run = True
     _, last_frame = cap.read()
-    print("a", last_frame)
     try:
         while run:
             c = c + 1
             has_frame, frame = cap.read()
 
             if has_frame:
-                if key == 1:
+                if key == 1 or key == 2:
                     sub_frame = get_diff(frame, last_frame)
                     sub_frame = cv.GaussianBlur(sub_frame, (11, 11), 100)
                     _, mask = cv.threshold(sub_frame, 50, 255, cv.THRESH_BINARY)
@@ -39,7 +38,9 @@ def main(cam_src=None):
                         w * h: (x, y, w, h)
                         for x, y, w, h in [cv.boundingRect(cnt) for cnt in contours]
                     }
-                    frame_c = frame.copy()
+
+                    frame_c = frame.copy() if key == 1 else canny.copy()
+
                     for a in sorted(selections, reverse=True):
                         x, y, w, h = selections[a]
                         cv.rectangle(
@@ -49,6 +50,7 @@ def main(cam_src=None):
                             color=(0, 255, 0),
                             thickness=3,
                         )
+
                     selections = {}
                     cv.imshow("main", frame_c)
 
@@ -76,4 +78,4 @@ if __name__ == "__main__":
     ip = "192.168.50.175"
     port = "8080"
     ip_cam_url = f"http://{usr}:{pas}@{ip}:{port}/video"
-    main()
+    main(ip_cam_url)
