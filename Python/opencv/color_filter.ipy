@@ -3,7 +3,12 @@ import cv2 as cv
 import time
 import math
 
-cap = cv.VideoCapture(0)
+usr = pas = "aaa"
+ip = "192.168.50.175"
+port = "8080"
+ip_cam_url = f"http://{usr}:{pas}@{ip}:{port}/video"
+
+cap = cv.VideoCapture(ip_cam_url)
 
 
 def get_ms():
