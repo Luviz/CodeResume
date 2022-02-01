@@ -71,10 +71,15 @@ def main(cam_src=None):
 
             if has_frame:
                 canny = None
+                canny_hue = None
                 if key <= 2:
                     canny = get_diff_canny(frame, last_frame)
+                    canny_hue = color_base_motion(frame, last_frame, 0)
                 elif key == 3:
                     canny = color_base_motion(frame, last_frame, 0)
+
+                if canny_hue is not None:
+                    selections_hue = get_selections(canny_hue)
 
                 if canny is not None:
                     selections = get_selections(canny)
@@ -88,10 +93,21 @@ def main(cam_src=None):
                         (x, y),
                         (x + w, y + h),
                         color=(0, 255, 0),
-                        thickness=3,
+                        thickness=2,
+                    )
+
+                for a in sorted(selections_hue, reverse=True):
+                    x, y, w, h = selections_hue[a]
+                    cv.rectangle(
+                        frame_c,
+                        (x, y),
+                        (x + w, y + h),
+                        color=(200, 0, 0),
+                        thickness=4,
                     )
 
                 selections = {}
+                selections_hue = {}
                 cv.imshow("main", frame_c)
 
                 ## last frame
