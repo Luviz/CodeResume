@@ -107,6 +107,17 @@ def main(cam_src=None):
         print("quiting")
 
 
+def getHueMask(hsv, value):
+    if value < 0:
+        value = 0
+    if value > 255:
+        value = 255
+
+    hue = hsv[:, :, 0]
+    _, th = cv.threshold(hue - value, 225, 255, cv.THRESH_BINARY)
+    return th
+
+
 def selectblue(img, frm=120, offset=20):
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV_FULL)
     hue = hsv[:, :, 0]
