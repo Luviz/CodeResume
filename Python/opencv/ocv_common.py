@@ -7,14 +7,19 @@ def get_diff(im1, im2):
     return cv.absdiff(im1_g, im2_g)
 
 
-def get_hue_mask(hsv, value):
+def get_hue_mask(hsv, value, useAdaptive=False):
     if value < 0:
         value = 0
     if value > 255:
         value = 255
 
     hue = hsv[:, :, 0]
-    _, th = cv.threshold(hue - value, 225, 255, cv.THRESH_BINARY)
+    if useAdaptive:
+        th = cv.adaptiveThreshold(
+            hue - value, 225, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2
+        )
+    else:
+        _, th = cv.threshold(hue - value, 225, 255, cv.THRESH_BINARY)
     return th
 
 

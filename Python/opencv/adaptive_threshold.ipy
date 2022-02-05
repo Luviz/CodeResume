@@ -30,27 +30,28 @@ try:
 
         try:
             thrs_gray = cv.adaptiveThreshold(
-                gray,  adpti_maxval, adaptiveMode, adpti_thresholdType, 31, adpti_C)
+                gray, adpti_maxval, adaptiveMode, adpti_thresholdType, 31, adpti_C
+            )
             cv.imshow("thrs_gray", thrs_gray)
 
             canny = cv.Canny(thrs_gray, 155, 200)
             cv.imshow("canny", canny)
 
-            contours, h = cv.findContours(
-                canny, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+            contours, h = cv.findContours(canny, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
             if len(contours):
                 contours = sorted(contours, key=cv.contourArea, reverse=True)
                 # print(len(contours))
                 # cv.drawContours(frame.copy(), contours, -1, (0,0,200), 10)
-                _ = cv.drawContours(frame, contours, -1,
-                                    (80, 255, 180), 1, hierarchy=h, maxLevel=2)
+                _ = cv.drawContours(
+                    frame, contours, -1, (80, 255, 180), 1, hierarchy=h, maxLevel=2
+                )
 
                 x, y, w, h = cv.boundingRect(contours[0])
-                cv.rectangle(frame, (x, y), (x+w, y+h), (255, 100, 0), 2)
+                cv.rectangle(frame, (x, y), (x + w, y + h), (255, 100, 0), 2)
 
                 for cnturs in contours[1:5]:
                     x, y, w, h = cv.boundingRect(cnturs)
-                    cv.rectangle(frame, (x, y), (x+w, y+h), (155, 255, 155), 2)
+                    cv.rectangle(frame, (x, y), (x + w, y + h), (155, 255, 155), 2)
 
                 # cv.rectangle(frame, )
                 # _ = cv.drawContours(frame, max_contour, -1, (0, 0, 255), 3)
@@ -64,27 +65,27 @@ try:
         waitKey = cv.waitKey(1)
         if waitKey > 0:
             print(waitKey, chr(waitKey))
-            if waitKey == ord('i'):
+            if waitKey == ord("i"):
                 adpti_thresholdType = adpti_thresholdType ^ 1
                 print(f"{adpti_thresholdType=}")
-            if waitKey == ord('o'):
+            if waitKey == ord("o"):
                 adpti_C -= 1
                 print(f"{adpti_C=}")
-            if waitKey == ord('p'):
+            if waitKey == ord("p"):
                 adpti_C += 1
                 print(f"{adpti_C=}")
-            if waitKey == ord('j'):
+            if waitKey == ord("j"):
                 adpti_maxval -= 16
                 print(f"{adpti_maxval=}")
-            if waitKey == ord('k'):
+            if waitKey == ord("k"):
                 adpti_maxval += 16
                 print(f"{adpti_maxval=}")
-            if waitKey == ord('m'):
+            if waitKey == ord("m"):
                 adaptiveMode = adaptiveMode ^ 1
                 print(f"{adaptiveMode=}")
-            if waitKey == ord('c'):
+            if waitKey == ord("c"):
                 cap = getCam()
-            if waitKey == ord('q') or waitKey == 27:
+            if waitKey == ord("q") or waitKey == 27:
                 run = False
 
 except Exception as e:

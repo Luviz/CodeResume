@@ -11,6 +11,8 @@ def main(cam_src=None):
     key = 0
     run = True
     _, last_frame = cap.read()
+    useAdaptive = False
+
     try:
         while run:
             c = c + 1
@@ -23,7 +25,8 @@ def main(cam_src=None):
 
                 # 0 = red; 100 = green; 190 blue
                 color_masks = [
-                    cvc.get_hue_mask(hsv, hue_start) for hue_start in [0, 100, 190]
+                    cvc.get_hue_mask(hsv, hue_start, useAdaptive=useAdaptive)
+                    for hue_start in [0, 100, 190]
                 ]
 
                 color_cannies = [cv.Canny(m, 100, 200) for m in color_masks]
@@ -63,6 +66,8 @@ def main(cam_src=None):
                     key = int(chr(waitKey))
                 if waitKey == ord("q") or waitKey == 27:
                     run = False
+                if waitKey == ord("a"):
+                    useAdaptive = not useAdaptive
 
     except KeyboardInterrupt as e:
         print("quiting")
