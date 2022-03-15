@@ -8,7 +8,7 @@ ip = "192.168.50.175"
 port = "8080"
 ip_cam_url = f"http://{usr}:{pas}@{ip}:{port}/video"
 
-cap = cv.VideoCapture(ip_cam_url)
+cap = cv.VideoCapture(0)
 
 
 def get_ms():
