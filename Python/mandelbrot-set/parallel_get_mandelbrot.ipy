@@ -1,0 +1,53 @@
+import multiprocessing
+import numpy as np
+from matplotlib import pyplot as plt
+
+
+def parallel_get_mandelbrot(dim, iter=512, r=2.0):
+    pool = multiprocessing.Pool()
+    results = []
+    for y in range(dim[0]):
+        result = pool.apply_async(get_mandelbrot_row, args=(y, dim, iter, r))
+        results.append(result)
+
+    pool.close()
+    pool.join()
+
+    matrix = np.matrix(np.zeros(dim))
+    for result in results:
+        y, row = result.get()
+        matrix[y, :] = row
+
+    return matrix
+
+
+def get_mandelbrot_row(y, dim, iter, r):
+    row = np.zeros(dim[1])
+    for x in range(dim[1]):
+        res = mandelbrot(x, y, dim, iter=iter, r=r)
+        row[x] = res
+    return y, row
+
+
+def mandelbrot(x, y, dim: tuple[int, int], iter=512, r=2.0):
+    (r_y, r_x) = dim
+    org_r = np.float128(np.interp(x, [0, r_x - 1], [-r, r]))
+    org_i = np.float128(np.interp(y, [0, r_y - 1], [-r, r]))
+
+    z = complex(0, 0)
+    for n in range(iter):
+        z = z * z + complex(org_r, org_i)
+        if abs(z) > r:
+            return np.interp(np.sqrt(n / iter), [0, 1], [0, 256])
+
+    return -1
+
+
+def main():
+    dim = 4096 * 2
+    mandelbrot_set = parallel_get_mandelbrot((dim, dim))
+    plt.imsave(f"./mandelbrot_{dim}.png", mandelbrot_set, cmap="twilight_shifted")
+
+
+if __name__ == "__main__":
+    main()
